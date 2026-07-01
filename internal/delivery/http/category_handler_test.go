@@ -18,11 +18,11 @@ import (
 )
 
 type mockCategoryService struct {
-	CreateFunc func(ctx context.Context, req *domain.CategoryCreateRequest, coverImageURL string) (*domain.Category, error)
+	CreateFunc func(ctx context.Context, input *domain.CategoryCreateInput, coverImageURL string) (*domain.Category, error)
 }
 
-func (m *mockCategoryService) Create(ctx context.Context, req *domain.CategoryCreateRequest, coverImageURL string) (*domain.Category, error) {
-	return m.CreateFunc(ctx, req, coverImageURL)
+func (m *mockCategoryService) Create(ctx context.Context, input *domain.CategoryCreateInput, coverImageURL string) (*domain.Category, error) {
+	return m.CreateFunc(ctx, input, coverImageURL)
 }
 
 func TestCategoryHandler_Create(t *testing.T) {
@@ -30,11 +30,11 @@ func TestCategoryHandler_Create(t *testing.T) {
 
 	t.Run("success create category", func(t *testing.T) {
 		mockService := &mockCategoryService{
-			CreateFunc: func(ctx context.Context, req *domain.CategoryCreateRequest, coverImageURL string) (*domain.Category, error) {
+			CreateFunc: func(ctx context.Context, input *domain.CategoryCreateInput, coverImageURL string) (*domain.Category, error) {
 				return &domain.Category{
 					ID:          "mock-uuid",
-					Name:        req.Name,
-					Description: req.Description,
+					Name:        input.Name,
+					Description: input.Description,
 					CoverImage:  coverImageURL,
 				}, nil
 			},
@@ -55,7 +55,7 @@ func TestCategoryHandler_Create(t *testing.T) {
 
 		// Add CoverImage file
 		part, _ := writer.CreateFormFile("cover_image", "test_cover.png")
-		_, _ = part.Write([]byte("fake image data"))
+		_, _ = part.Write([]byte("\x89PNG\r\n\x1a\nfake image data"))
 
 		_ = writer.Close()
 
@@ -132,6 +132,32 @@ func TestCategoryHandler_Create(t *testing.T) {
 		// Using .txt file extension which is not allowed
 		part, _ := writer.CreateFormFile("cover_image", "test_cover.txt")
 		_, _ = part.Write([]byte("fake file data"))
+		_ = writer.Close()
+
+		req, _ := http.NewRequest(http.MethodPost, "/api/category", body)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("Expected status 400, got %d. Body: %s", w.Code, w.Body.String())
+		}
+	})
+
+	t.Run("validation failure - invalid MIME type (spoofed extension)", func(t *testing.T) {
+		mockService := &mockCategoryService{}
+		handler := deliveryHTTP.NewCategoryHandler(mockService)
+		router := gin.Default()
+		router.POST("/api/category", handler.Create)
+
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+
+		_ = writer.WriteField("name", "Action Games")
+		// Using .png extension but sending plain text content
+		part, _ := writer.CreateFormFile("cover_image", "test_cover.png")
+		_, _ = part.Write([]byte("fake file data which is plain text"))
 		_ = writer.Close()
 
 		req, _ := http.NewRequest(http.MethodPost, "/api/category", body)

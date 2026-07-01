@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"mime/multipart"
 	"time"
 )
 
@@ -15,10 +14,9 @@ type Category struct {
 	UpdatedAt   time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }
 
-type CategoryCreateRequest struct {
-	Name        string                `form:"name" binding:"required,max=255"`
-	Description string                `form:"description"`
-	CoverImage  *multipart.FileHeader `form:"cover_image" binding:"required"`
+type CategoryCreateInput struct {
+	Name        string
+	Description string
 }
 
 type CategoryRepository interface {
@@ -26,5 +24,5 @@ type CategoryRepository interface {
 }
 
 type CategoryService interface {
-	Create(ctx context.Context, req *CategoryCreateRequest, coverImageURL string) (*Category, error)
+	Create(ctx context.Context, input *CategoryCreateInput, coverImageURL string) (*Category, error)
 }

@@ -18,12 +18,12 @@ func NewCategoryService(categoryRepo domain.CategoryRepository) domain.CategoryS
 	}
 }
 
-func (s *categoryService) Create(ctx context.Context, req *domain.CategoryCreateRequest, coverImageURL string) (*domain.Category, error) {
+func (s *categoryService) Create(ctx context.Context, input *domain.CategoryCreateInput, coverImageURL string) (*domain.Category, error) {
 	now := time.Now()
 	category := &domain.Category{
 		ID:          uuid.New().String(),
-		Name:        req.Name,
-		Description: req.Description,
+		Name:        input.Name,
+		Description: input.Description,
 		CoverImage:  coverImageURL,
 		CreatedAt:   now,
 		UpdatedAt:   now,
