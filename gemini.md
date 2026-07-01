@@ -43,6 +43,7 @@ api/
 *   **JSON Format (Response/Request API):** Menggunakan `snake_case` (contoh: `user_id`, `created_at`).
 *   **Go Variables, Structs & Functions:** Wajib menggunakan *Idiomatic Go* yaitu `camelCase` untuk private variable/function dan `PascalCase` untuk public/exported field atau function (contoh: `UserID`, `ConsoleID`, `calculateTotal()`).
 *   **Database Table & Columns:** Menggunakan `snake_case`.
+*   **Standardisasi Response API:** Semua response HTTP yang dikembalikan oleh handler API wajib menggunakan helper dari package `pkg/response` (`SendSuccess`, `SendSuccessWithMeta`, atau `SendError`). Dilarang memanggil `c.JSON` secara langsung untuk mengembalikan response handler utama guna memastikan konsistensi format JSON (`success`, `status`, `message`, `data`, `errors`, `meta`).
 
 ## 🔄 Alur Kerja Penambahan Fitur (Workflow)
 Saat ada permintaan penambahan fitur baru, proses kerjanya adalah sebagai berikut:

@@ -22,3 +22,6 @@ tmp/
 
 # Go test coverage
 *.out
+
+# storage
+public/uploads/
