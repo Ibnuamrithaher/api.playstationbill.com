@@ -15,10 +15,10 @@ type PaginationMeta struct {
 // Response defines the standard JSON response format for the application
 type Response struct {
 	Success bool        `json:"success"`
+	Status  int         `json:"status"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data,omitempty"`
 	Errors  interface{} `json:"errors,omitempty"`
-	Status  int         `json:"status"`
 	Meta    interface{} `json:"meta,omitempty"`
 }
 
@@ -45,7 +45,7 @@ func SendSuccessWithMeta(c *gin.Context, statusCode int, message string, data in
 
 // SendError sends an error JSON response with the given status code, message, and error details
 func SendError(c *gin.Context, statusCode int, message string, errors interface{}) {
-	c.JSON(statusCode, Response{
+	c.AbortWithStatusJSON(statusCode, Response{
 		Success: false,
 		Message: message,
 		Errors:  errors,
