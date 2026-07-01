@@ -77,6 +77,10 @@ func TestCategoryHandler_Create(t *testing.T) {
 			t.Errorf("Expected success true, got %v", resp["success"])
 		}
 
+		if resp["status"] != float64(http.StatusCreated) {
+			t.Errorf("Expected status in JSON body %d, got %v", http.StatusCreated, resp["status"])
+		}
+
 		data := resp["data"].(map[string]interface{})
 		if data["name"] != "Action Games" {
 			t.Errorf("Expected category name 'Action Games', got '%s'", data["name"])
